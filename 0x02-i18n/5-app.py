@@ -27,9 +27,9 @@ users = {
 def get_user() -> dict:
     """ docs docs """
     users_id = request.args.get("login_as")
-    if users_id is None and not in users:
-        return None
-    return users[users_id]
+    if users_id is not None and int(users_id) in users:
+        return users[int(users_id)]
+    return None
 
 
 @app.before_request
