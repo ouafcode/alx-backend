@@ -24,7 +24,7 @@ users = {
 }
 
 
-def get_user():
+def get_user() -> dict:
     """ docs docs """
     users_id = request.args.get("login_as")
     if users_id is None and not in users:
@@ -39,7 +39,7 @@ def before_request():
 
 
 @babel.localeselector
-def get_locale():
+def get_locale() -> str:
     """ docs docs """
     if request.args.get("locale") in app.config["LANGUAGES"]:
         return request.args.get("locale")
@@ -48,7 +48,7 @@ def get_locale():
 
 @app.route('/')
 def index():
-    """ flask fucnt """
+    """ flask funct """
     return render_template('5-index.html')
 
 
