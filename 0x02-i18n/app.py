@@ -2,11 +2,12 @@
 """ Basic Flask app """
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
-import pyz
+import pytz
+from datetime import datetime
 
 
 class Config(object):
-    """ docs docs """
+    """ Configuration for Flask app """
     LANGUAGES = ['en', 'fr']
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"
@@ -26,7 +27,7 @@ users = {
 
 
 def get_user() -> dict:
-    """ docs docs """
+    """ Retrieve user from request arguments """
     users_id = request.args.get("login_as")
     if users_id is not None and int(users_id) in users:
         return users[int(users_id)]
@@ -35,39 +36,41 @@ def get_user() -> dict:
 
 @app.before_request
 def before_request():
-    """ docs docs """
+    """ Set user for the current request """
     g.user = get_user()
 
 
 @babel.localeselector
 def get_locale() -> str:
-    """ docs docs """
+    """ Determine the best match locale """
     if request.args.get("locale") in app.config["LANGUAGES"]:
         return request.args.get("locale")
     if g.user and g.user.get("locale") in app.config["LANGUAGES"]:
         return g.user["locale"]
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
+
 @babel.timezoneselector
 def get_timezone() -> str:
-    try :
+    """ Determine the user's timezone """
+    try:
         if request.args.get("timezone"):
-            return pytz.timezone(request.args.get("timezome")).zone
+            return pytz.timezone(request.args.get("timezone")).zone
         if g.user and g.user.get("timezone"):
             return pytz.timezone(g.user["timezone"]).zone
-        except pytz.exceptions.UnknownTimeZoneError:
-            pass
-        return "UTC"
-        
-        
+    except pytz.exceptions.UnknownTimeZoneError:
+        pass
+    return "UTC"
+
+
 @app.route('/')
 def index():
-    """ flask funct """
-    from datetime import datetime
+    """ Route for the index page """
     from flask_babel import format_datetime
-
-    curr_time = fromat_datetime(datetime.utcnow())
-    return render_template('index.html', current_time=curr_time)
+    
+    timezone = get_timezone()
+    curr_time = format_datetime(datetime.now(pytz.timezone(timezone)))
+    return render_template('5-index.html', current_time=curr_time)
 
 
 if __name__ == "__main__":
